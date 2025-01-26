@@ -3,54 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Socket.io Client</title>
-    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <title>PC Connection</title>
 </head>
 <body>
-    <h1>Socket.IO Client</h1>
-    <div id="status">Connecting...</div>
+    <h1>Connect Your PC</h1>
+    <form id="connectionForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="ip">IP Address:</label>
+        <input type="text" id="ip" name="ip" required><br><br>
+        <label for="hwid">HWID:</label>
+        <input type="text" id="hwid" name="hwid" required><br><br>
+        <button type="submit">Connect</button>
+    </form>
 
     <script>
-        // URL of the GitHub Pages site (Frontend) or public IP of the server (Backend)
-        const SERVER_URL = "https://c1lone.github.io/Website/"; // URL of the backend server
+        document.getElementById("connectionForm").addEventListener("submit", function(event) {
+            event.preventDefault();
 
-        // Create a Socket.IO client
-        const socket = io(SERVER_URL, {
-            transports: ['websocket']
+            const username = document.getElementById("username").value;
+            const ip = document.getElementById("ip").value;
+            const hwid = document.getElementById("hwid").value;
+
+            fetch("http://<server_ip>:5000/connect", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    username: username,
+                    ip: ip,
+                    hwid: hwid
+                })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message))
+            .catch(error => alert("Connection failed: " + error));
         });
-
-        // Update the status
-        const statusDiv = document.getElementById("status");
-
-        // When connected to the server
-        socket.on("connect", function() {
-            statusDiv.innerHTML = "Connected to the server!";
-            console.log("Connected to the server");
-        });
-
-        // Handle disconnect from server
-        socket.on("disconnect", function() {
-            statusDiv.innerHTML = "Disconnected from the server.";
-            console.log("Disconnected from the server");
-        });
-
-        // Handle messages from the server
-        socket.on("notify", function(data) {
-            console.log("Received message from server:", data);
-            alert("Message from server: " + data.message);
-        });
-        
-        // Send a message to the server every 3 hours
-        setInterval(() => {
-            console.log("Sending /reset whitelist:HWID 3 command to server.");
-            socket.emit("notify", { message: "/reset whitelist:HWID 3" });
-        }, 3 * 3600 * 1000); // Send every 3 hours
-
-        // Handle server acknowledgment
-        socket.on("acknowledge", function(data) {
-            console.log("Acknowledgment from server:", data.message);
-        });
-
     </script>
 </body>
 </html>
