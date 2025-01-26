@@ -1,36 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Socket.IO Dashboard</title>
-  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    #log { white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.io Client</title>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
 </head>
 <body>
-  <h1>Socket.IO Dashboard</h1>
-  <div id="log">Connecting...</div>
+    <h1>Socket.IO Client</h1>
+    <div id="status">Connecting...</div>
 
-  <script>
-    const log = document.getElementById("log");
-    const socket = io("http://localhost:3000"); // Replace with your backend server's URL
+    <script>
+        // URL of the GitHub Pages site (Frontend) or public IP of the server (Backend)
+        const SERVER_URL = "https://c1lone.github.io/Website/"; // URL of the backend server
 
-    // Log connection status
-    socket.on("connect", () => {
-      log.textContent += "Connected to server\n";
-    });
+        // Create a Socket.IO client
+        const socket = io(SERVER_URL, {
+            transports: ['websocket']
+        });
 
-    socket.on("disconnect", () => {
-      log.textContent += "Disconnected from server\n";
-    });
+        // Update the status
+        const statusDiv = document.getElementById("status");
 
-    // Handle notifications
-    socket.on("notify", (data) => {
-      log.textContent += `Notification received: ${JSON.stringify(data)}\n`;
-    });
-  </script>
+        // When connected to the server
+        socket.on("connect", function() {
+            statusDiv.innerHTML = "Connected to the server!";
+            console.log("Connected to the server");
+        });
+
+        // Handle disconnect from server
+        socket.on("disconnect", function() {
+            statusDiv.innerHTML = "Disconnected from the server.";
+            console.log("Disconnected from the server");
+        });
+
+        // Handle messages from the server
+        socket.on("notify", function(data) {
+            console.log("Received message from server:", data);
+            alert("Message from server: " + data.message);
+        });
+        
+        // Send a message to the server every 3 hours
+        setInterval(() => {
+            console.log("Sending /reset whitelist:HWID 3 command to server.");
+            socket.emit("notify", { message: "/reset whitelist:HWID 3" });
+        }, 3 * 3600 * 1000); // Send every 3 hours
+
+        // Handle server acknowledgment
+        socket.on("acknowledge", function(data) {
+            console.log("Acknowledgment from server:", data.message);
+        });
+
+    </script>
 </body>
 </html>
