@@ -3,40 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Communication Hub</title>
-  <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+  <title>Socket.IO Dashboard</title>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    #log { max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; }
-    input, button { margin-top: 10px; }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #log { white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; }
   </style>
 </head>
 <body>
-  <h1>Communication Hub</h1>
-  <div id="log"></div>
-  <input type="text" id="message" placeholder="Type a message">
-  <button onclick="sendMessage()">Send</button>
+  <h1>Socket.IO Dashboard</h1>
+  <div id="log">Connecting...</div>
 
   <script>
-    const socket = io("http://10.5.0.2:3000/"); // Replace with your backend URL
-
     const log = document.getElementById("log");
+    const socket = io("http://localhost:3000"); // Replace with your backend server's URL
 
-    // Receive messages
-    socket.on("message", (data) => {
-      log.innerHTML += `<p><strong>${data.sender}:</strong> ${data.message}</p>`;
-      log.scrollTop = log.scrollHeight;
+    // Log connection status
+    socket.on("connect", () => {
+      log.textContent += "Connected to server\n";
     });
 
-    // Send messages
-    function sendMessage() {
-      const message = document.getElementById("message").value;
-      if (message.trim() !== "") {
-        socket.emit("message", { sender: "Browser Client", message });
-        log.innerHTML += `<p><strong>Me:</strong> ${message}</p>`;
-        document.getElementById("message").value = "";
-      }
-    }
+    socket.on("disconnect", () => {
+      log.textContent += "Disconnected from server\n";
+    });
+
+    // Handle notifications
+    socket.on("notify", (data) => {
+      log.textContent += `Notification received: ${JSON.stringify(data)}\n`;
+    });
   </script>
 </body>
 </html>
