@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Communication Hub</title>
+  <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #log { max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; }
+    input, button { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Communication Hub</h1>
+  <div id="log"></div>
+  <input type="text" id="message" placeholder="Type a message">
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    const socket = io("https://your-backend-url.com"); // Replace with your backend URL
+
+    const log = document.getElementById("log");
+
+    // Receive messages
+    socket.on("message", (data) => {
+      log.innerHTML += `<p><strong>${data.sender}:</strong> ${data.message}</p>`;
+      log.scrollTop = log.scrollHeight;
+    });
+
+    // Send messages
+    function sendMessage() {
+      const message = document.getElementById("message").value;
+      if (message.trim() !== "") {
+        socket.emit("message", { sender: "Browser Client", message });
+        log.innerHTML += `<p><strong>Me:</strong> ${message}</p>`;
+        document.getElementById("message").value = "";
+      }
+    }
+  </script>
+</body>
+</html>
